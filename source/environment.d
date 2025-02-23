@@ -74,12 +74,16 @@ class Environment {
 		
 	}
 
-	ulong PopData() {
+	ulong TopData() {
 		if (dataStack.length == 0) {
 			throw new EnvironmentError("Data stack underflow");
 		}
 
-		auto res  = dataStack[$ - 1];
+		return dataStack[$ - 1];
+	}
+
+	ulong PopData() {
+		auto res = TopData();
 		dataStack = dataStack[0 .. $ - 1];
 		return res;
 	}

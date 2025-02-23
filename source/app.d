@@ -13,12 +13,22 @@ int main(string[] args) {
 		writefln("Usage: %s FILE", args[0]);
 	}
 	else {
-		env.CompileFile("kernel.fs");
-		env.CompileFile(args[1]);
+		try {
+			env.CompileFile("kernel.fs");
+			env.CompileFile(args[1]);
+		}
+		catch (EnvironmentError e) {
+			stderr.writefln("Error: %s", e.msg);
+			return 1;
+		}
 		env.EndCompile();
 
 		try {
 			env.Run();
+		}
+		catch (EnvironmentError e) {
+			stderr.writefln("Error: %s", e.msg);
+			return 1;
 		}
 		catch (ProgramQuit) {
 			return 0;

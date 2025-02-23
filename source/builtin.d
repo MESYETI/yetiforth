@@ -135,6 +135,44 @@ private void EndWord(Environment env, Inst* inst) {
 	env.compiled[index].callInt = env.compiled.length;
 }
 
+private void BeginImmWord(Environment env, Inst* inst) {
+	NextWord(env, null);
+	auto wordName = GetAndFree(env);
+
+	if (wordName in env.words) {
+		// i think other forths allow you to make multiple words with the same name
+		// but i don't really like that
+		throw new EnvironmentError("Cannot redefine word '%s'", wordName);
+	}
+
+	// jump to end of word definition
+	env.compiled ~= Inst(0, &Jump);
+
+	// push address of last instruction
+	env.dataStack ~= env.compiled.length - 1;
+
+	// push word name
+	env.dataStack ~= cast(ulong) wordName.ToCString();
+}
+
+private void EndImmWord(Environment env, Inst* inst) {
+	auto  wordName = GetAndFree(env);
+	ulong defStart = env.TopData() + 1;
+
+	Word word;
+
+	// kinda spaghetti
+	for (ulong i = defStart; i < env.compiled.length; ++ i) {
+		word.compile ~= env.compiled[i];
+	}
+
+	env.compiled = env.compiled[0 .. defStart];
+
+	word.run ~= Inst(env.compiled.length, &Call);
+
+	env.words[wordName] = word;
+}
+
 private void ModeCompile(Environment env, Inst* inst) {
 	env.mode = RunMode.Compile;
 }
@@ -173,8 +211,16 @@ private void Dup(Environment env, Inst* inst) {
 	env.dataStack ~= env.dataStack[$ - 1];
 }
 
+private void Drop(Environment env, Inst* inst) {
+	env.PopData();
+}
+
 private void Type(Environment env, Inst* inst) {
 	writef("%s", (cast(char*) env.PopData()).fromStringz());
+}
+
+private void SaveComp(Environment env, Inst* inst) {
+	env.compiled ~= Inst(env.PopData(), &PushInt);
 }
 
 void AddBuiltins(Environment env) {
@@ -186,10 +232,14 @@ void AddBuiltins(Environment env) {
 	env.words["return"]     = Word.Interpret(&Return);
 	env.words[":"]          = Word.Compile(&BeginWord);
 	env.words[";"]          = Word.Compile(&EndWord);
+	env.words["::"]         = Word.Compile(&BeginImmWord);
+	env.words[";;"]         = Word.Compile(&EndImmWord);
 	env.words["#compile"]   = Word.Interpret(&ModeCompile);
 	env.words["#interpret"] = Word.Compile(&ModeInterpret);
 	env.words["s\""]        = Word.Compile(&String);
 	env.words["free"]       = Word.Interpret(&Free);
 	env.words["dup"]        = Word.Interpret(&Dup);
+	env.words["drop"]       = Word.Interpret(&Drop);
 	env.words["type"]       = Word.Interpret(&Type);
+	env.words["save_comp"]  = Word.Compile(&SaveComp);
 }
