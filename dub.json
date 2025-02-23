@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"MESYETI"
+	],
+	"copyright": "Copyright © 2025, MESYETI",
+	"description": "Yeti's Forth",
+	"license": "GPL",
+	"name": "yetiforth"
+}

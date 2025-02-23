@@ -1,0 +1,17 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/yetiforth
+yetiforth.so
+yetiforth.dylib
+yetiforth.dll
+yetiforth.a
+yetiforth.lib
+yetiforth-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
+test.fs
