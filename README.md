@@ -7,3 +7,8 @@ In the future I will add documentation for this.
 ```
 dub build
 ```
+
+## Run example programs
+```
+./yetiforth examples/exampleNameHere.fs
+```
